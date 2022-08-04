@@ -1,0 +1,31 @@
+.cyp-p-login {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #192634;
+  gap: 3rem;
+
+  > h1 {
+    color: white;
+    font-size: 5rem;
+  }
+
+  &__login-area {
+    background-color: lightgray;
+    padding: 3rem;
+    width: 70rem;
+    border-radius: 1rem;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    > h1 {
+      margin-bottom: 2rem;
+    }
+  }
+}
