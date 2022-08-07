@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 type AuthCTXProps = {
   login(email: string, password: string): void;
@@ -12,12 +12,15 @@ function AuthProvider({ children }) {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const navigator = useNavigate();
 
-  const login = useCallback((email: string, password: string) => {
-    if (email == "teste@teste.com" && password == "123456") {
-      setIsLogged(true);
-      navigator("/home");
-    }
-  }, []);
+  const login = useCallback(
+    (email: string, password: string) => {
+      if (email === "teste@teste.com" && password === "123456") {
+        setIsLogged(true);
+        navigator("/home");
+      }
+    },
+    [navigator]
+  );
 
   return (
     <AuthCTX.Provider value={{ login, isLogged }}>{children}</AuthCTX.Provider>
