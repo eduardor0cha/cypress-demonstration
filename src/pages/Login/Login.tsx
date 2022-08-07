@@ -1,7 +1,6 @@
 import { useContext } from "react";
-import Button from "../components/Button/Button";
-import Input from "../components/Input/Input";
-import { AuthCTX } from "../contexts/AuthCTX";
+import { Button, Input } from "../../components";
+import { AuthCTX } from "../../contexts/AuthCTX";
 
 function Login(): JSX.Element {
   const { login } = useContext(AuthCTX);
@@ -18,7 +17,11 @@ function Login(): JSX.Element {
         <h1>Fazer login</h1>
         <form onSubmit={(e) => submit(e)}>
           <Input className="input-email" placeholder="E-mail" />
-          <Input placeholder="Senha" />
+          <Input
+            className="input-password"
+            placeholder="Senha"
+            type="password"
+          />
           <Button type="submit">Entrar</Button>
         </form>
       </div>
