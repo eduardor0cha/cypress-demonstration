@@ -2,11 +2,30 @@
 
 Este repositório tem como objetivo demonstrar os exemplos utilizados no tutorial de como utilizar a ferramenta [Cypress](https://www.cypress.io/) contido nesse arquivo.
 
+- Clone:
+
+```bash
+git clone https://github.com/eduardor0cha/cypress-demonstration.git
+cd cypress-demonstration/
+```
+
+- E instale as dependências:
+
+```bash
+yarn
+```
+
+ou
+
+```bash
+npm install
+```
+
 ---
 
 ## Instalação e primeiros passos
 
-Para adicionar o Cypress ao seu projeto, basta rodar:
+Para adicionar o Cypress ao seu próprio projeto, basta rodar:
 
 ```bash
 npm install cypress --save-dev
