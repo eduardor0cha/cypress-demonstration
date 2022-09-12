@@ -163,4 +163,167 @@ cy.url().should("include", "/home");
 
 Com esse código dentro do teste, o Cypress verifica se o url atual inclui o caminho "/home". Inclusive, é possível ver na imagem anterior, que esse teste da URL obteve sucesso. Logo, ao fazer login, o usuário é, de fato, redirecionado para o local esperado.
 
-Não se esqueça de visitar a documentação do Cypress para ler sobre os outros comandos e assertions. Pois os mostrados até então, são apenas uma pequena parcela de todos os disponíveis.
+---
+
+## Criando um teste unitário
+
+Basicamente, testes uniários servem para testar as partes do sistema, cada uma de forma indepentente das outras. Nos exemplos a seguir, faremos testes de API. Tomaremos como objeto de teste a `AuthAPI` contida neste projeto, testando o método de login.
+
+Apesar de testes unitários não serem testes E2E, iremos colocar os arquivos de teste unitários dentro do diretório `cypress/e2e/`. Pois para adicionar uma pasta específica para os unit tests, seria necessárias configurações mais avançadas que variam de acordo com a estrutura de cada projeto.
+
+O arquivo destinado para os nossos testes relacionados à AuthAPI será o `AuthAPI.cy.ts`, contido na pasta mencionada. Observe o seu conteúdo:
+
+```ts
+import AuthAPI from "../../src/api/AuthAPI";
+
+describe("AuthAPI", () => {
+  it("deve retornar os dados do usuário ao fazer login", async () => {
+    cy.intercept("POST", "https://api-teste.com/api/auth/login", {
+      statusCode: 200,
+      fixture: "login-response.json",
+    });
+
+    const api = new AuthAPI();
+    const response = await api.login("teste@teste.com", "123456");
+    expect(response);
+    expect(response.id);
+    expect(response.name);
+    expect(response.username);
+    expect(response.age);
+  });
+
+  it("deve retornar um erro ao tentar logar com dados inválidos", async () => {
+    cy.intercept("POST", "https://api-teste.com/api/auth/login", {
+      statusCode: 400,
+      forceNetworkError: true,
+    });
+
+    const api = new AuthAPI();
+    expect(await api.login("teste@teste.com", "123456")).to.throw();
+  });
+});
+```
+
+Note que a estutura principal é a mesma dos testes E2E, composta por `describe` e `it`. A principal diferença agora, é que não utilizaremos mais comandos e assertions relacionados à interface como o `.get` ou o `.visit`, por exemplo.
+
+Ao fazer o teste, é interessante que não se faça requisições ao backend, visto que isso gera uma demanda desnecessária para o sistema. Com isso, se faz necessária a simulação das respostas vindas da API.
+
+---
+
+### Intercept
+
+A principal forma de fazer essa simulação é através do método `.intercept`, o qual monitora as requisições feitas e tem a capacidade de interceptá-las. Podendo barrar aquela requisição e devolver uma resposta se passando pelo destino.
+
+Ele pode ser usado com diferentes formatos de parâmetros. Dentre eles:
+
+```ts
+cy.intercept("MÉTODO HTTP", "URL de destino", { resposta });
+```
+
+A `resposta` pode ser composta por vários atributos, dentre elas `statusCode`,
+`body`, `fixture`, etc.
+
+- `body`: Este recebe um JSON, o qual será o conteúdo da resposta simulada;
+
+- `fixture`: Já este, substitui o `body` quando ele não é definido, também sendo a resposta da requisição.
+
+  - Fixtures nada mais são que dados pré-definidos dentro do projeto. Elas são armazenadas dentro do diretório `cypress/fixtures/`.
+
+  - Cada fixture é composta por um arquivo `.json`, que armazena os dados.
+
+  - Dentro do método `.intercept`, podemos usá-las através do atributo `fixture` do objeto de resposta. Especificando-a através do nome do arquivo fixture correspondente:
+
+    ```ts
+    cy.intercept("POST", "https://api-teste.com/api/auth/login", {
+      statusCode: 200,
+      fixture: "login-response.json",
+    });
+    ```
+
+    No arquivo `login-response.json`, localizado no diretório `cypress/fixtures`, há os dados a serem utilizados. Os quais, serão utilizados como resposta na resposta falsa que o `intercept` enviará:
+
+    ```json
+    {
+      "id": 1,
+      "name": "Test User",
+      "username": "testuser",
+      "age": 20
+    }
+    ```
+
+---
+
+### Expect
+
+Para testar, de fato, os dados recebidos através da API (no caso dos testes, são os dados falsos recebidos da interceptação) usamos o `expect()`. Ele nos dá a possibilidade de passa algo como argumento dentro dele, e testar o dado através de **assertions**.
+
+- Assertions são afirmações em que o argumento do `expect()` deve atender para que o teste seja dado como bem sucedido. Observe o exemplo:
+
+  ```ts
+  expect(response).eq("teste");
+  ```
+
+  Note que é passado uma variável dentro do `expect`, e logo em seguida vem a assertion `.eq` (equal - _igual_), que indica que a variável passada (`response`) deverá ser igual ao argumento passado dentro de `.eq`. Ou seja, `response` derá ser igual a "teste". Caso contrário, o teste falhará.
+
+  > **O conjunto de assertions usados é o Chai. Para conseguir usar tais assertions, é necessário instalar o pacote do Chai, com:**
+  >
+  > ```bash
+  > npm install --save-dev chai @types/chai
+  > ```
+  >
+  > ou
+  >
+  > ```bash
+  > yarn add chai @types/chai --dev
+  > ```
+
+---
+
+### Executando o teste unitário
+
+Devido ao fato de que nesses testes não será testada a interface, não se faz necessário o uso da aplicação gráfica do Cypress. Mas é claro, que ainda pode-se utilizá-la utilizando o comando já mencionado anteriormente:
+
+```bash
+npx cypress open
+```
+
+Porém, podemos executar os testes diretamente da linha de comando utilizando:
+
+```bash
+npx cypress run
+```
+
+Esse comando rodará todos os testes e entregará os resultados.
+
+> O uso do comando **run** trás um recurso que pode ser considerado um infortúnio: o Cypress gerará um vídeo do teste toda vez que for rodado, e tirará screenshots dos erros que por ventura ocorrerem.
+>
+> Caso você queira desabilitar essa funcionalidade, basta adicionar as seguintes linhas ao arquivo `cypress.config.ts`:
+>
+> ```ts
+> screenshotOnRunFailure: false,
+> video: false,
+> ```
+>
+> Coloque como mostrado a seguir:
+>
+> ```bash
+> import { defineConfig } from "cypress";
+>
+> export default defineConfig({
+>  e2e: {
+>    setupNodeEvents(on, config) {
+>      // implement node event listeners here
+>    },
+>  },
+>  screenshotOnRunFailure: false,
+>  video: false,
+> });
+> ```
+
+---
+
+Não esqueça de visitar os seguintes sites para obter um conhecimento maior acerca dos métodos, comandos e assertions disponíveis:
+
+- [Tabela de conteúdos](https://docs.cypress.io/api/table-of-contents).
+
+- [Documentação do Chai](https://www.chaijs.com/api/bdd/)
