@@ -195,11 +195,10 @@ describe("AuthAPI", () => {
   it("deve retornar um erro ao tentar logar com dados inválidos", async () => {
     cy.intercept("POST", "https://api-teste.com/api/auth/login", {
       statusCode: 400,
-      forceNetworkError: true,
     });
 
     const api = new AuthAPI();
-    expect(await api.login("teste@teste.com", "123456")).to.throw();
+    expect(await api.login("teste@teste.com", "123456")).not.true;
   });
 });
 ```
@@ -324,6 +323,6 @@ Esse comando rodará todos os testes e entregará os resultados.
 
 Não esqueça de visitar os seguintes sites para obter um conhecimento maior acerca dos métodos, comandos e assertions disponíveis:
 
-- [Tabela de conteúdos](https://docs.cypress.io/api/table-of-contents).
+- [Tabela de conteúdos](https://docs.cypress.io/api/table-of-contents)
 
 - [Documentação do Chai](https://www.chaijs.com/api/bdd/)
